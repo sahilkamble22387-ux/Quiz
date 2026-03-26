@@ -1,0 +1,149 @@
+.notification-screen {
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.07), transparent 35%),
+    radial-gradient(circle at 50% 30%, rgba(192, 21, 42, 0.08), transparent 42%),
+    linear-gradient(180deg, var(--bg2), #020106 72%);
+}
+
+.notification-backdrop {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.74));
+}
+
+.notification-frame {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  min-height: calc(100vh - 240px);
+}
+
+.notification-banner-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.notification-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(400px, calc(100vw - 32px));
+  border-radius: 22px;
+  padding: 14px 18px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.05)),
+    rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  text-align: left;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.36),
+    0 0 40px rgba(192, 21, 42, 0.12);
+}
+
+.notification-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #c0152a, #8b0000);
+  font-size: 22px;
+  box-shadow: 0 12px 24px rgba(192, 21, 42, 0.22);
+}
+
+.notification-text {
+  flex: 1;
+}
+
+.notification-app {
+  font-size: 13px;
+  color: var(--white);
+}
+
+.notification-message {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.notification-time {
+  font-size: 11px;
+  color: var(--dimmer);
+}
+
+.notification-hint {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: lowercase;
+  color: var(--dimmer);
+}
+
+.notification-expanded {
+  margin: 0 auto;
+  width: min(500px, 90vw);
+  border-radius: 28px;
+  padding: 48px;
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.08), transparent 34%),
+    rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  box-shadow:
+    0 28px 90px rgba(0,0,0,0.42),
+    0 0 60px rgba(192,21,42,0.12);
+}
+
+.notification-character {
+  position: relative;
+  height: 200px;
+}
+
+.notification-expanded-copy {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.notification-question {
+  font-size: clamp(28px, 5vw, 52px);
+  color: var(--white);
+  line-height: 0.98;
+}
+
+.notification-subtext {
+  margin-top: 24px;
+  font-size: 13px;
+  line-height: 1.8;
+  font-style: italic;
+  color: var(--dimmer);
+}
+
+.notification-primary {
+  min-width: auto;
+  padding-inline: 56px;
+  padding-block: 18px;
+  font-size: 24px;
+  background: linear-gradient(135deg, #c0152a, #8b0000);
+}
+
+.notification-secondary {
+  min-width: auto;
+  padding-inline: 56px;
+  padding-block: 18px;
+  font-size: 15px;
+}
+
+@media (max-width: 640px) {
+  .notification-expanded {
+    padding: 32px 20px;
+  }
+
+  .notification-primary,
+  .notification-secondary {
+    width: 100%;
+    padding-inline: 24px;
+  }
+}

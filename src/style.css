@@ -1,0 +1,93 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #07040f;
+  overflow: hidden;
+  cursor: none;
+  font-family: 'DM Sans', sans-serif;
+}
+canvas { 
+  position: fixed; 
+  top: 0; left: 0; 
+  z-index: 0; 
+}
+#ui {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+#ui * { pointer-events: auto; }
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, #e8678a, #c02060);
+  border: none; border-radius: 4px;
+  padding: 18px 64px;
+  font-family: 'Playfair Display', serif;
+  font-style: italic; font-size: 22px;
+  color: white; cursor: pointer;
+  box-shadow: 0 12px 40px rgba(232,103,138,0.35);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 20px 60px rgba(232,103,138,0.5);
+}
+
+.btn-ghost {
+  background: transparent;
+  border: none;
+  font-family: 'Playfair Display', serif;
+  font-style: italic; font-size: 20px;
+  color: rgba(250,240,244,0.8);
+  cursor: pointer;
+  border-bottom: 1px solid rgba(232,103,138,0.4);
+  padding: 8px 4px;
+  transition: color 0.3s, border-color 0.3s;
+}
+.btn-ghost:hover {
+  color: #e8678a;
+  border-color: #e8678a;
+}
+
+.quiz-option {
+  display: block; width: 100%;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 14px 22px;
+  color: rgba(250,240,244,0.7);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300; font-size: 14px;
+  text-align: left; cursor: pointer;
+  margin-bottom: 10px;
+  transition: all 0.25s;
+}
+.quiz-option:hover {
+  background: rgba(232,103,138,0.08);
+  border-color: rgba(232,103,138,0.3);
+  color: #faf0f4;
+  transform: translateX(8px);
+}
+
+/* Custom Cursor */
+#cursor-dot {
+  position: fixed;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #e8678a;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  pointer-events: none;
+  transition: transform 0.1s;
+}
+#cursor-ring {
+  position: fixed;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(240,160,184,0.5);
+  transform: translate(-50%, -50%);
+  z-index: 9998;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+}

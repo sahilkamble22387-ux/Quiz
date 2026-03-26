@@ -1,0 +1,143 @@
+.heartdoor-screen {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at center, rgba(192, 21, 42, 0.08), transparent 26%),
+    linear-gradient(180deg, #05030a, #020106);
+}
+
+.heartdoor-tunnel,
+.heartdoor-flash {
+  position: absolute;
+  inset: 0;
+}
+
+.heartdoor-tunnel {
+  width: 100%;
+  height: 100%;
+}
+
+.heartdoor-flash {
+  background: #ffffff;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.heartdoor-center {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 24px;
+}
+
+.heartdoor-shell {
+  position: relative;
+  width: min(65vh, 65vw);
+  height: min(65vh, 65vw);
+  min-width: 320px;
+  min-height: 320px;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.heartdoor-halo,
+.heartdoor-light {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.heartdoor-halo {
+  inset: -8%;
+  background: radial-gradient(circle, rgba(192, 21, 42, 0.38), rgba(139, 0, 0, 0.18), transparent 72%);
+  filter: blur(42px);
+  opacity: 0;
+}
+
+.heartdoor-light {
+  inset: -12%;
+  background: radial-gradient(circle, #fff8e0 0%, #c0152a 40%, #07040f 100%);
+  filter: blur(26px);
+  opacity: 0;
+}
+
+.heartdoor-half {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  will-change: transform, filter;
+}
+
+.heartdoor-half-left {
+  clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);
+  transform-origin: 50% 50%;
+}
+
+.heartdoor-half-right {
+  clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);
+  transform-origin: 50% 50%;
+}
+
+.heartdoor-face {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-45deg);
+  border-radius: 22%;
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.18), transparent 18%),
+    linear-gradient(145deg, #cf1f36 0%, #c0152a 50%, #8b0000 100%);
+  box-shadow:
+    0 0 42px rgba(192, 21, 42, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.heartdoor-face::before,
+.heartdoor-face::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: inherit;
+}
+
+.heartdoor-face::before {
+  top: -50%;
+  left: 0;
+}
+
+.heartdoor-face::after {
+  top: 0;
+  left: 50%;
+}
+
+.heartdoor-copy {
+  max-width: 420px;
+  text-align: center;
+}
+
+.heartdoor-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(26px, 4vw, 44px);
+  color: rgba(250, 240, 244, 0.8);
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 640px) {
+  .heartdoor-shell {
+    width: min(72vw, 72vh);
+    height: min(72vw, 72vh);
+    min-width: 280px;
+    min-height: 280px;
+  }
+}

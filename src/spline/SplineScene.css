@@ -1,0 +1,7 @@
+.spline-stage {
+  overflow: hidden;
+}
+
+.spline-stage canvas {
+  inset: 0;
+}

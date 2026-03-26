@@ -1,0 +1,213 @@
+.story-route {
+  position: relative;
+  background: linear-gradient(180deg, #05030a, #030108 60%, #020106);
+}
+
+.story-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.cinematic-backdrop {
+  position: absolute;
+  inset: 0;
+}
+
+.cinematic-backdrop canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.story-background-wash {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.05), transparent 24%),
+    radial-gradient(circle at bottom, rgba(192, 21, 42, 0.14), transparent 32%),
+    linear-gradient(180deg, rgba(4, 2, 10, 0.22), rgba(4, 2, 10, 0.48));
+}
+
+.story-film-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.1;
+  mix-blend-mode: screen;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.22) 0 0.7px, transparent 0.8px),
+    radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.18) 0 0.7px, transparent 0.8px),
+    radial-gradient(circle at 40% 70%, rgba(255, 255, 255, 0.16) 0 0.7px, transparent 0.8px);
+  background-size: 180px 180px, 210px 210px, 240px 240px;
+}
+
+.story-progress-bar {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 60;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.story-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #c0152a, #f5c842);
+}
+
+.story-content {
+  position: relative;
+  z-index: 10;
+}
+
+.story-section {
+  position: relative;
+  min-height: 100vh;
+  scroll-margin-top: 72px;
+}
+
+.story-beat,
+.love-beat {
+  display: flex;
+  align-items: center;
+  padding: 48px 24px;
+}
+
+.story-beat-shell,
+.love-beat-shell {
+  width: min(1280px, 100%);
+  margin: 0 auto;
+}
+
+.story-beat-copy {
+  width: min(440px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 36px 0;
+}
+
+.story-beat-left .story-beat-shell {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.story-beat-right .story-beat-shell {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.story-beat-center .story-beat-shell {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+
+.story-kicker {
+  font-size: 10px;
+  letter-spacing: 0.55em;
+  text-transform: uppercase;
+  color: rgba(250, 240, 244, 0.42);
+}
+
+.story-chapter-index {
+  font-size: 10px;
+  letter-spacing: 0.8em;
+  text-transform: uppercase;
+  color: rgba(192, 21, 42, 0.85);
+}
+
+.story-title,
+.love-beat-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(48px, 10vw, 112px);
+  line-height: 0.92;
+  color: var(--white);
+  text-wrap: balance;
+  text-shadow:
+    0 0 18px rgba(255, 255, 255, 0.08),
+    0 0 70px rgba(192, 21, 42, 0.12);
+}
+
+.story-lines,
+.love-beat-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.story-lines p,
+.love-beat-lines p {
+  max-width: 26ch;
+  font-size: clamp(16px, 2vw, 21px);
+  line-height: 1.7;
+  font-weight: 300;
+  color: rgba(250, 240, 244, 0.66);
+}
+
+.story-beat-center .story-lines,
+.story-beat-center .story-lines p,
+.love-beat-copy,
+.love-beat-lines,
+.love-beat-lines p {
+  margin-inline: auto;
+  text-align: center;
+}
+
+.love-beat {
+  overflow: hidden;
+}
+
+.love-beat-number {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(180px, 28vw, 320px);
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.04);
+  pointer-events: none;
+}
+
+.love-beat-copy {
+  width: min(620px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 36px 0;
+}
+
+.love-beat-title {
+  max-width: 10ch;
+}
+
+@media (max-width: 768px) {
+  .story-beat,
+  .love-beat {
+    padding: 32px 20px;
+  }
+
+  .story-beat-shell,
+  .love-beat-shell {
+    display: block;
+  }
+
+  .story-beat-copy,
+  .love-beat-copy {
+    width: 100%;
+    text-align: center;
+    align-items: center;
+  }
+
+  .story-lines p,
+  .love-beat-lines p {
+    max-width: 22ch;
+  }
+
+  .love-beat-number {
+    font-size: clamp(120px, 38vw, 200px);
+  }
+}

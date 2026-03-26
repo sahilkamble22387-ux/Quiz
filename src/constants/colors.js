@@ -1,0 +1,17 @@
+export const COLORS = {
+  bg: '#07040f',
+  bg2: '#0d0816',
+  bg3: '#0a0612',
+  rose: '#e8678a',
+  blush: '#f0a0b8',
+  gold: '#f5c842',
+  lavender: '#c4a8e8',
+  mint: '#a8e8d0',
+  white: '#faf0f4',
+  muted: 'rgba(250,240,244,0.5)',
+  dimmer: 'rgba(250,240,244,0.25)',
+  cardBg: 'rgba(255,255,255,0.04)',
+  cardBorder: 'rgba(255,255,255,0.08)',
+  roseGlow: 'rgba(232,103,138,0.2)',
+  goldGlow: 'rgba(245,200,66,0.2)',
+}
