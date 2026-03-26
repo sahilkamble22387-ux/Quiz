@@ -61,10 +61,12 @@ function safeParse<T>(value: string | null, fallback: T) {
 }
 
 function getEnv() {
-  const meta = import.meta as ImportMeta & {
-    env?: Record<string, string | undefined>
+  return {
+    VITE_ENGAGEMENT_WEBHOOK: import.meta.env.VITE_ENGAGEMENT_WEBHOOK,
+    VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
+    VITE_SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
+    VITE_SUPABASE_EVENTS_TABLE: import.meta.env.VITE_SUPABASE_EVENTS_TABLE,
   }
-  return meta.env ?? {}
 }
 
 function getEnvEndpoint() {
@@ -375,6 +377,15 @@ export function getTrackingStatus() {
 export function getTrackedEvents() {
   if (!isBrowser()) return []
   return safeParse<TrackerEvent[]>(window.localStorage.getItem(EVENTS_KEY), [])
+}
+
+export function getFrontendEnvStatus() {
+  const env = getEnv()
+  return {
+    hasSupabaseUrl: Boolean(env.VITE_SUPABASE_URL?.trim()),
+    hasSupabaseAnonKey: Boolean(env.VITE_SUPABASE_ANON_KEY?.trim()),
+    hasSupabaseEventsTable: Boolean(env.VITE_SUPABASE_EVENTS_TABLE?.trim()),
+  }
 }
 
 export async function fetchRemoteEngagementEvents(adminCode: string, limit = 300) {

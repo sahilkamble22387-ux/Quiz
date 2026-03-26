@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { fetchRemoteEngagementEvents } from '../../lib/engagementTracker'
+import { fetchRemoteEngagementEvents, getFrontendEnvStatus } from '../../lib/engagementTracker'
 
 const ADMIN_CODE_STORAGE_KEY = 'confession_admin_code'
 
@@ -80,6 +80,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [lastLoadedAt, setLastLoadedAt] = useState('')
+  const envStatus = getFrontendEnvStatus()
 
   useEffect(() => {
     const stored = window.sessionStorage.getItem(ADMIN_CODE_STORAGE_KEY) || ''
@@ -232,6 +233,17 @@ export default function AdminDashboard() {
             }}
           >
             {error}
+            {error.includes('Supabase is not configured') ? (
+              <div style={{ marginTop: 10, fontSize: 13, color: 'rgba(255,220,225,0.86)' }}>
+                Frontend env check:
+                {' '}
+                URL {envStatus.hasSupabaseUrl ? 'yes' : 'no'},
+                {' '}
+                anon key {envStatus.hasSupabaseAnonKey ? 'yes' : 'no'},
+                {' '}
+                table {envStatus.hasSupabaseEventsTable ? 'yes' : 'no'}
+              </div>
+            ) : null}
           </div>
         ) : null}
 
