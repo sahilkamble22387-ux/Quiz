@@ -12,16 +12,18 @@ import type { CameraRigHandle } from './CameraRig'
 import ChapterOrbs from './ChapterOrbs'
 import EngagementAdmin from './EngagementAdmin'
 import NarrationText from './NarrationText'
+import ReturnVisitOverlay, { RETURN_VISIT_DURATION } from './ReturnVisitOverlay'
 import ScenePortal from './ScenePortal'
 import SceneFirstSight from './SceneFirstSight'
 import SceneAssignment from './SceneAssignment'
 import SceneSnapchat from './SceneSnapchat'
 import SceneAlmostMeet from './SceneAlmostMeet'
+import SceneSheCameBack from './SceneSheCameBack'
 import SceneConfession from './SceneConfession'
 import SceneTogether from './SceneTogether'
 import YesExplosion from './YesExplosion'
 import { CHAPTERS, LOADING_MIN_MS, SCENE_CONFIG, TOGETHER_NARRATION, type SceneDefinition } from '../../lib/sceneConfig'
-import { startTrackingSession, trackButtonClick, trackSceneView } from '../../lib/engagementTracker'
+import { startTrackingSession, trackButtonClick, trackEvent, trackSceneView } from '../../lib/engagementTracker'
 
 type EpilogueStage = 'none' | 'yesExplosion' | 'together'
 
@@ -48,6 +50,23 @@ const TOGETHER_SCENE: DisplayScene = {
     { at: 28, position: [0, 2.1, 5.8], target: [0, 1.15, 0.2], duration: 4 },
     { at: 42, position: [2.4, 1.7, 3.8], target: [0, 1.3, 0], duration: 5 },
     { at: 56, position: [0, 1.8, 2.8], target: [0, 1.3, 0], duration: 3 },
+  ],
+}
+
+const RETURN_VISIT_COUNT_KEY = 'confession_return_visit_count'
+
+const SHE_CAME_BACK_SCENE: DisplayScene = {
+  id: 'sheCameBack',
+  index: 0,
+  label: 'She Came Back',
+  chapterLabel: 'A Quiet Return',
+  duration: RETURN_VISIT_DURATION,
+  narration: [],
+  camera: [
+    { at: 0, position: [0, 2.35, 8.6], target: [0, 1.3, 0], duration: 2.4, ease: 'power2.out' },
+    { at: 18, position: [-1.1, 2.2, 7.6], target: [0, 1.25, 0.4], duration: 18, ease: 'power1.inOut' },
+    { at: 43, position: [1.2, 2.12, 7.25], target: [0, 1.2, 0.18], duration: 16, ease: 'power1.inOut' },
+    { at: 61, position: [0, 2.05, 6.9], target: [0, 1.18, 0], duration: 8, ease: 'power2.inOut' },
   ],
 }
 
@@ -80,6 +99,8 @@ function renderScene(sceneId: string, sceneTime: number, accepted: boolean, acce
   switch (sceneId) {
     case 'portal':
       return <ScenePortal sceneTime={sceneTime} />
+    case 'sheCameBack':
+      return <SceneSheCameBack sceneTime={sceneTime} />
     case 'firstSight':
       return <SceneFirstSight sceneTime={sceneTime} />
     case 'assignment':
@@ -186,23 +207,31 @@ export default function ConfessionExperience() {
   const [loading, setLoading] = useState(true)
   const [needsAudioTap, setNeedsAudioTap] = useState(false)
   const [showRotateHint, setShowRotateHint] = useState(false)
+  const [visitCount, setVisitCount] = useState(1)
+  const [returnVisitEligible, setReturnVisitEligible] = useState(false)
+  const [returnVisitPending, setReturnVisitPending] = useState(false)
+  const [returnVisitActive, setReturnVisitActive] = useState(false)
+  const [returnVisitTime, setReturnVisitTime] = useState(0)
   const [epilogueStage, setEpilogueStage] = useState<EpilogueStage>('none')
   const [epilogueTime, setEpilogueTime] = useState(0)
   const [acceptedTime, setAcceptedTime] = useState(0)
   const startRef = useRef<number>(performance.now())
+  const returnVisitStartRef = useRef<number>(0)
   const epilogueStartRef = useRef<number>(0)
   const acceptedStartRef = useRef<number>(0)
   const lastSceneRenderRef = useRef<number>(0)
+  const lastReturnVisitRenderRef = useRef<number>(0)
   const lastAcceptedRenderRef = useRef<number>(0)
   const lastEpilogueRenderRef = useRef<number>(0)
   const confessionVolumeRef = useRef<number | null>(null)
   const cameraRigRef = useRef<CameraRigHandle | null>(null)
   const rafRef = useRef<number>()
+  const returnVisitRafRef = useRef<number>()
   const epilogueRafRef = useRef<number>()
   const acceptedRafRef = useRef<number>()
   const activeScene = sceneByIndex(sceneIndex)
-  const displayScene = epilogueStage === 'together' ? TOGETHER_SCENE : activeScene
-  const displayTime = epilogueStage === 'together' ? epilogueTime : sceneTime
+  const displayScene = epilogueStage === 'together' ? TOGETHER_SCENE : returnVisitActive ? SHE_CAME_BACK_SCENE : activeScene
+  const displayTime = epilogueStage === 'together' ? epilogueTime : returnVisitActive ? returnVisitTime : sceneTime
   const acceptedCamera = accepted && epilogueStage === 'none' && activeScene.id === 'confession'
     ? acceptedTime < 1.4
       ? { position: [0, 1.7, 4.15] as [number, number, number], target: [0, 1.34, 0.16] as [number, number, number], duration: 1.0, ease: 'power2.out' }
@@ -216,6 +245,17 @@ export default function ConfessionExperience() {
   useEffect(() => {
     const timer = window.setTimeout(() => setLoading(false), LOADING_MIN_MS)
     return () => window.clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    const storedCount = window.localStorage.getItem(RETURN_VISIT_COUNT_KEY)
+    const parsedCount = Number.parseInt(storedCount ?? '0', 10)
+    const nextCount = Number.isFinite(parsedCount) && parsedCount > 0 ? parsedCount + 1 : 1
+
+    window.localStorage.setItem(RETURN_VISIT_COUNT_KEY, String(nextCount))
+    setVisitCount(nextCount)
+    setReturnVisitEligible(nextCount >= 4)
+    setReturnVisitPending(nextCount >= 4)
   }, [])
 
   useEffect(() => {
@@ -242,15 +282,16 @@ export default function ConfessionExperience() {
 
   useEffect(() => {
     if (loading) return
+    if (returnVisitActive) return
     trackSceneView(displayScene.id, {
       chapterLabel: displayScene.chapterLabel,
       sceneIndex: displayScene.index,
       epilogueStage,
     })
-  }, [displayScene.chapterLabel, displayScene.id, displayScene.index, epilogueStage, loading])
+  }, [displayScene.chapterLabel, displayScene.id, displayScene.index, epilogueStage, loading, returnVisitActive])
 
   useEffect(() => {
-    if (loading || epilogueStage !== 'none') return
+    if (loading || epilogueStage !== 'none' || returnVisitActive) return
     if (!audioRef.current.isScenePlaying(sceneIndex)) {
       audioRef.current.ensureScene(sceneIndex)
     }
@@ -267,10 +308,10 @@ export default function ConfessionExperience() {
     }, 900)
 
     return () => window.clearTimeout(timer)
-  }, [loading, sceneIndex, epilogueStage])
+  }, [loading, sceneIndex, epilogueStage, returnVisitActive])
 
   useEffect(() => {
-    if (loading || epilogueStage !== 'none') return
+    if (loading || epilogueStage !== 'none' || returnVisitActive) return
 
     const tick = () => {
       const elapsed = (performance.now() - startRef.current) / 1000
@@ -280,6 +321,11 @@ export default function ConfessionExperience() {
       }
 
       if (activeScene.duration && elapsed >= activeScene.duration) {
+        if (activeScene.id === 'portal' && returnVisitPending) {
+          setReturnVisitPending(false)
+          setReturnVisitActive(true)
+          return
+        }
         setSceneIndex((current) => Math.min(current + 1, SCENE_CONFIG.length - 1))
         return
       }
@@ -291,7 +337,51 @@ export default function ConfessionExperience() {
     return () => {
       if (rafRef.current) window.cancelAnimationFrame(rafRef.current)
     }
-  }, [activeScene.duration, epilogueStage, loading])
+  }, [activeScene.duration, activeScene.id, epilogueStage, loading, returnVisitActive, returnVisitPending])
+
+  useEffect(() => {
+    if (!returnVisitActive) return
+
+    returnVisitStartRef.current = performance.now()
+    lastReturnVisitRenderRef.current = 0
+    setReturnVisitTime(0)
+    confessionVolumeRef.current = 0.2
+    audioRef.current.playCustomScene('scene6', 0, 0.2)
+    trackSceneView('sheCameBack', {
+      chapterLabel: SHE_CAME_BACK_SCENE.chapterLabel,
+      sceneIndex: SHE_CAME_BACK_SCENE.index,
+      epilogueStage,
+      visitCount,
+    })
+    trackEvent('return_visit_scene_viewed', { visit_count: visitCount })
+
+    const tick = () => {
+      const elapsed = (performance.now() - returnVisitStartRef.current) / 1000
+      if (elapsed - lastReturnVisitRenderRef.current >= SCENE_STATE_STEP) {
+        lastReturnVisitRenderRef.current = elapsed
+        setReturnVisitTime(elapsed)
+      }
+      returnVisitRafRef.current = window.requestAnimationFrame(tick)
+    }
+
+    returnVisitRafRef.current = window.requestAnimationFrame(tick)
+    return () => {
+      if (returnVisitRafRef.current) window.cancelAnimationFrame(returnVisitRafRef.current)
+    }
+  }, [returnVisitActive, visitCount])
+
+  useEffect(() => {
+    if (!returnVisitActive || returnVisitTime < RETURN_VISIT_DURATION) return
+
+    trackEvent('return_visit_scene_completed')
+    setReturnVisitActive(false)
+    setReturnVisitTime(0)
+    setSceneIndex(1)
+    startRef.current = performance.now()
+    lastSceneRenderRef.current = 0
+    setSceneTime(0)
+    audioRef.current.crossfadeTo(1)
+  }, [returnVisitActive, returnVisitTime])
 
   useEffect(() => {
     if (!accepted || epilogueStage !== 'none') return
@@ -378,6 +468,7 @@ export default function ConfessionExperience() {
   useEffect(
     () => () => {
       if (rafRef.current) window.cancelAnimationFrame(rafRef.current)
+      if (returnVisitRafRef.current) window.cancelAnimationFrame(returnVisitRafRef.current)
       if (epilogueRafRef.current) window.cancelAnimationFrame(epilogueRafRef.current)
       if (acceptedRafRef.current) window.cancelAnimationFrame(acceptedRafRef.current)
       audioRef.current.stopAll()
@@ -426,11 +517,30 @@ export default function ConfessionExperience() {
     })
     setAccepted(false)
     setAcceptedTime(0)
+    setReturnVisitActive(false)
+    setReturnVisitTime(0)
+    setReturnVisitPending(returnVisitEligible)
     setEpilogueStage('none')
     setEpilogueTime(0)
     setSceneIndex(0)
     startRef.current = performance.now()
     lastSceneRenderRef.current = 0
+    audioRef.current.crossfadeTo(0)
+  }
+
+  const handleBackToBeginning = () => {
+    trackButtonClick('return_visit_back_to_beginning', {
+      sceneId: displayScene.id,
+      visitCount,
+    })
+    setReturnVisitActive(false)
+    setReturnVisitTime(0)
+    setReturnVisitPending(returnVisitEligible)
+    setSceneIndex(0)
+    setSceneTime(0)
+    startRef.current = performance.now()
+    lastSceneRenderRef.current = 0
+    cameraRigRef.current?.flyTo(SCENE_CONFIG[0].camera[0].position, SCENE_CONFIG[0].camera[0].target, 0.01, 'none')
     audioRef.current.crossfadeTo(0)
   }
 
@@ -528,16 +638,24 @@ export default function ConfessionExperience() {
           {renderScene(displayScene.id, displayTime, accepted, acceptedTime)}
           <EffectComposer>
             <Bloom
-              intensity={displayScene.id === 'confession' ? 0.75 : displayScene.id === 'portal' ? 0.5 : 0.4}
-              luminanceThreshold={displayScene.id === 'confession' ? 0.38 : displayScene.id === 'portal' ? 0.5 : 0.6}
-              luminanceSmoothing={displayScene.id === 'confession' ? 0.8 : 0.9}
+              intensity={displayScene.id === 'confession' ? 0.75 : displayScene.id === 'sheCameBack' ? 0.32 : displayScene.id === 'portal' ? 0.5 : 0.4}
+              luminanceThreshold={displayScene.id === 'confession' ? 0.38 : displayScene.id === 'sheCameBack' ? 0.74 : displayScene.id === 'portal' ? 0.5 : 0.6}
+              luminanceSmoothing={displayScene.id === 'confession' ? 0.8 : displayScene.id === 'sheCameBack' ? 0.96 : 0.9}
             />
-            <Vignette offset={displayScene.id === 'confession' ? 0.28 : 0.4} darkness={displayScene.id === 'confession' ? 0.72 : 0.5} />
+            <Vignette offset={displayScene.id === 'confession' ? 0.28 : displayScene.id === 'sheCameBack' ? 0.22 : 0.4} darkness={displayScene.id === 'confession' ? 0.72 : displayScene.id === 'sheCameBack' ? 0.16 : 0.5} />
           </EffectComposer>
         </Suspense>
       </Canvas>
 
-      {!loading && epilogueStage !== 'yesExplosion' ? <NarrationText lines={displayScene.narration} sceneTime={displayTime} /> : null}
+      {!loading && epilogueStage !== 'yesExplosion' && !returnVisitActive ? <NarrationText lines={displayScene.narration} sceneTime={displayTime} /> : null}
+
+      {!loading && returnVisitActive ? (
+        <ReturnVisitOverlay
+          sceneTime={returnVisitTime}
+          visitCount={visitCount}
+          onBackToBeginning={handleBackToBeginning}
+        />
+      ) : null}
 
       {!loading && activeScene.id === 'confession' && epilogueStage === 'none' ? (
         <div
@@ -552,7 +670,7 @@ export default function ConfessionExperience() {
         />
       ) : null}
 
-      {!loading && displayScene.id !== 'portal' && displayScene.id !== 'confession' && epilogueStage !== 'yesExplosion' && displayTime <= 4.8 ? (
+      {!loading && displayScene.id !== 'portal' && displayScene.id !== 'confession' && displayScene.id !== 'sheCameBack' && epilogueStage !== 'yesExplosion' && displayTime <= 4.8 ? (
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
@@ -606,7 +724,7 @@ export default function ConfessionExperience() {
         </motion.div>
       ) : null}
 
-      {!loading && needsAudioTap && epilogueStage === 'none' ? (
+      {!loading && needsAudioTap && epilogueStage === 'none' && !returnVisitActive ? (
         <motion.button
           type="button"
           onClick={() => {
@@ -642,10 +760,24 @@ export default function ConfessionExperience() {
         </motion.button>
       ) : null}
 
-      {!loading && activeScene.id !== 'portal' && epilogueStage === 'none' && !accepted ? (
+      {!loading && activeScene.id !== 'portal' && epilogueStage === 'none' && !accepted && !returnVisitActive ? (
         <ChapterOrbs
           activeSceneId={activeScene.id}
           onJump={handleJump}
+        />
+      ) : null}
+
+      {returnVisitActive && returnVisitTime >= RETURN_VISIT_DURATION - 3.4 ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: Math.min((returnVisitTime - (RETURN_VISIT_DURATION - 3.4)) / 3.4, 1) }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: '#FFF8EC',
+            pointerEvents: 'none',
+            zIndex: 82,
+          }}
         />
       ) : null}
 

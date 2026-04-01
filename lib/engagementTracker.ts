@@ -13,6 +13,8 @@ type TrackerEventName =
   | 'scene_revisited'
   | 'button_clicked'
   | 'journey_completed'
+  | 'return_visit_scene_viewed'
+  | 'return_visit_scene_completed'
 
 type TrackerPayload = Record<string, unknown>
 
@@ -313,7 +315,7 @@ function storeEvent(event: TrackerEvent) {
   window.localStorage.setItem(EVENTS_KEY, JSON.stringify(trimmed))
 }
 
-function trackEvent(name: TrackerEventName, payload: TrackerPayload = {}) {
+export function trackEvent(name: TrackerEventName, payload: TrackerPayload = {}) {
   if (!isBrowser()) return
   const client = getClientInfo()
   const event: TrackerEvent = {
